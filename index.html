@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <script src="js/jquery-2.1.3.min.js"></script>
+    <link rel="stylesheet" href="css/sample.css">
+    <title>じゃんけん</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-image: url('img/abarenbo_OP.gif');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        #horse {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <div id="timer" style="font-size: 100px;">00:20</div>
+        <div style="font-size: 24px; text-align: center;">好きな上様を3つから選んで、20秒以内に乗馬上様を左に移動しよう</div>
+    </header>
+
+    <main>
+        <div id="choices">
+            <ul>
+                <li id="cho_btn"><img src="img/choki.png" alt="チョキ" class="rotate" style="width:200px; height:200px;"></li>
+                <li id="gu_btn"><img src="img/goo.png" alt="グー" class="rotate" style="width:200px; height:200px;"></li>
+                <li id="par_btn"><img src="img/par.png" alt="パー" class="rotate" style="width:200px; height:200px;"></li>
+            </ul>
+        </div>
+        <div id="result">
+            <img src="img/horse.png" alt="乗馬" id="horse">
+            <div id="kachi_img" style="display:none;">
+                <img src="img/ippozenshin.png">
+            </div>
+            <div id="make_img" style="display:none;">
+                <img src="img/kotai.png">
+            </div> 
+            <div id="aiko_img" style="display:none;">
+                <img src="img/machi.png">
+            </div>
+            <audio id="matsukenMusic" src="audio/matsuken.mp3"></audio> <!-- 音声ファイルのパスを修正 -->
+        </div>
+    </main>
+
+    <audio id="backgroundMusic" autoplay>
+        <source src="audio/abarenbo_OP.mp3" type="audio/mp3"> <!-- 音声ファイルのパスを修正 -->
+    </audio>
+
+    <script>
+    $(document).ready(function () {
+   function updateDimensions() {
+        windowWidth = $(window).width(); // ウィンドウの幅
+        horseWidth = $("#horse").outerWidth(); // 乗馬の画像の幅（マージン、パディング、ボーダー含む）
+        maxLeft = windowWidth - horseWidth; // 移動可能な最大のleft値
+        // 現在の位置が新しい最大値を超えていないかチェック
+        horseCurrentRight = Math.min(horseCurrentRight, maxRight);
+        $("#horse").css("right", horseCurrentRight + "px");
+    }
+
+    let horseWidth = $("#horse").outerWidth(); // 初期値
+    let windowWidth = $(window).width(); // 初期値
+    let maxRight = windowWidth - horseWidth;
+    let horseCurrentRight = 0; // 乗馬の初期位置（左端からの距離）
+    let timerIsActive = false;
+    let horseReachedEnd = false;
+
+
+    $(window).resize(updateDimensions); // 画面サイズが変更されたら更新
+
+
+    function startTimer(duration) {
+        if (timerIsActive) return; // タイマーが既に開始されていれば何もしない
+        timerIsActive = true; // タイマーをアクティブに設定
+        const backgroundMusic = $('#backgroundMusic')[0];
+        backgroundMusic.volume = 0.5; // 音量を設定、必要に応じて変更してください
+        backgroundMusic.play(); // 背景音楽を再生
+
+
+        let remaining = duration;
+        const timer = setInterval(function () {
+            remaining--;
+            const minutes = parseInt(remaining / 60, 10);
+            const seconds = parseInt(remaining % 60, 10);
+
+            $('#timer').text(`${minutes < 10 ? "0" : ""}${minutes}:${seconds < 10 ? "0" : ""}${seconds}`); // タイマー表示を更新
+
+            if (remaining <= 0) {
+                clearInterval(timer);
+                timerIsActive = false; // タイマーが終了したらフラグをリセット
+                disableButtons();
+                backgroundMusic.pause();
+            }
+        }, 1000);
+    }
+
+    function launchMatsukenDance() {
+        const totalImages = 5; // 各側から現れる画像の数
+        const windowHeight = $(window).height();
+        const windowWidth = $(window).width();
+
+        // 画像の生成とアニメーションを行う関数
+        function createAndAnimateMatsuken(startX, startY, endX, endY) {
+            let matsuken = $('<img src="img/matsuken_dance.png" class="flying-matsuken">').css({
+                position: 'absolute',
+                left: startX,
+                top: startY,
+                width: '150px',
+                height: 'auto',
+                zIndex: 999
+            });
+
+            $('body').append(matsuken);
+
+            $(matsuken).animate({
+                left: endX,
+                top: endY
+            }, 5000, function() {
+                $(this).remove();
+            });
+        }
+
+        // 左下と右下から画像を発射
+        for (let i = 0; i < totalImages; i++) {
+            createAndAnimateMatsuken(0, windowHeight - 50, Math.random() * (windowWidth / 2), -100);
+            createAndAnimateMatsuken(windowWidth, windowHeight - 50, windowWidth / 2 + Math.random() * (windowWidth / 2), -100);
+        }
+    }
+    
+
+    function checkIfHorseReachedEnd() {
+        if (horseCurrentRight >= maxLeft && timerIsActive) { // 画面の反対側に到達し、タイマーがまだアクティブな場合
+            horseReachedEnd = true;
+            timerIsActive = false; // タイマーを停止
+            const matsukenMusic = $('#matsukenMusic')[0];
+            matsukenMusic.volume = 0.2;
+            $('#matsukenMusic')[0].play(); 
+            launchMatsukenDance(); 
+            const backgroundMusic = $('#backgroundMusic')[0];
+            backgroundMusic.pause();
+            backgroundMusic.currentTime = 0; // 再生位置を最初に戻す
+        }
+    }
+
+    function disableButtons() {
+        // クリックイベントハンドラーを削除して、ボタンを無効化
+        $('#gu_btn, #cho_btn, #par_btn').off('click').addClass('disabled');
+    }
+    
+
+    $('#gu_btn, #cho_btn, #par_btn').click(function() {
+        startTimer(20);
+        if (!timerIsActive) {
+            // タイマーが非アクティブならばここで処理を停止
+            return;
+        }
+
+        const playerChoice = this.id.replace('_btn', '');
+        const choices = ['gu', 'cho', 'par'];
+        const computerChoice = choices[Math.floor(Math.random() * choices.length)];
+
+    
+        // 画像表示前にすべての画像のアニメーションクラスを一度削除
+        $('#kachi_img img, #make_img img, #aiko_img img').removeClass('grow-animation');
+
+        if (playerChoice === computerChoice) {
+            $('#kachi_img, #make_img').hide();
+            $('#aiko_img').show().find('img').addClass('grow-animation');
+        } else if (
+            (playerChoice === 'gu' && computerChoice === 'cho') ||
+            (playerChoice === 'cho' && computerChoice === 'par') ||
+            (playerChoice === 'par' && computerChoice === 'gu')
+        ) {
+            $('#aiko_img, #make_img').hide();
+            $('#kachi_img').show().find('img').addClass('grow-animation');
+            horseCurrentRight = Math.min(maxRight, horseCurrentRight + 40); // 前進 (右に移動)
+        } else {
+            $('#aiko_img, #kachi_img').hide();
+            $('#make_img').show().find('img').addClass('grow-animation');
+            horseCurrentRight = Math.max(0, horseCurrentRight - 20); // 後退 (左に移動)
+        }
+
+        checkIfHorseReachedEnd(); // 画像が移動した後に終点に達したか確認
+
+        // 画像が画面内に収まるように位置を調整
+        $("#horse").css("right", horseCurrentRight + "px");
+    });
+
+    // 初期設定として画面幅と乗馬の画像幅を更新
+    updateDimensions();
+});
+
+        </script>
+        
+</body>
+</html>

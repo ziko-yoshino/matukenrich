@@ -1,0 +1,119 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-size: 16px; /* Adjusted for better scaling */
+    text-align: center; /* Center content */
+}
+header {
+    text-align: center; /* タイマーを中央寄せ */
+    padding: 20px; /* パディングを追加 */
+    color: #333; /* 文字色を設定 */
+}
+
+#timer {
+    font-size: 2em; /* タイマーのフォントサイズを調整 */
+    /* その他のスタイルは必要に応じて調整 */
+}
+main{
+    border-bottom:none;
+}
+.result-text {
+    font-size: 1.5em; /* Larger text for result */
+    margin: 20px 0; /* Space around result text */
+}
+p{
+    font-size:200%;
+    text-align: center;
+    border-bottom:none;
+    height:200px;
+}
+ul{
+    padding: 0;
+    border-top: none;
+    display:table;  /* 定義 */
+    table-layout: fixed;
+    width:100%;
+}
+li{
+    list-style-type: none;
+    border: none; /* ここを変更して枠線を消去 */
+    display: table-cell;
+    cursor: pointer;
+    height: 20px;
+}
+
+@media (max-width: 600px) {
+    body {
+        font-size: 14px; /* Smaller font on small screens */
+    }
+
+    .result-text {
+        font-size: 1.2em; /* Adjust result text size for small screens */
+    }
+}
+
+@keyframes continuous-rotation {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.rotate {
+    animation: continuous-rotation 2s linear infinite;
+}
+
+.rotate:hover {
+    /* 回転アニメーションを維持しつつ、拡大する */
+    animation: continuous-rotation 2s linear infinite, hover-scale 0.3s forwards;
+}
+
+@keyframes hover-scale {
+    from {
+        transform: scale(1.0);
+    }
+    to {
+        transform: scale(2.0); /* ホバー時に画像を2倍に拡大 */
+    }
+}
+
+#horse {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 40%; 
+    height: auto; /* 高さを自動で調整し、アスペクト比を保持 */
+}
+
+#kachi_img img, #make_img img, #aiko_img img {
+    width: 500px; /* 画像の幅を100pxに調整 */
+}
+
+@keyframes grow {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.grow-animation {
+    animation: grow 0.5s ease-out forwards;
+}
+
+@keyframes fallAnimation {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+}
+
+.falling-matsuken {
+    position: absolute;
+    animation: fallAnimation 3s infinite linear;
+    top: 0;
+    /* 必要に応じて他のスタイルを追加 */
+}

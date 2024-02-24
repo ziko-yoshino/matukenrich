@@ -88,7 +88,9 @@
         timerIsActive = true; // タイマーをアクティブに設定
         const backgroundMusic = $('#backgroundMusic')[0];
         backgroundMusic.volume = 0.5; // 音量を設定、必要に応じて変更してください
-        backgroundMusic.play(); // 背景音楽を再生
+        if (backgroundMusic.paused) {
+            backgroundMusic.play(); // 背景音楽を再生
+        }
 
 
         let remaining = duration;
